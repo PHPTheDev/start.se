@@ -29,7 +29,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'usuarios'
+    'usuarios',
+    'empresarios'
 ]
 
 MIDDLEWARE = [
@@ -51,18 +51,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-ROOT_URLCONF = 'core.urls'
-
-
-
-MESSAGE_TAGS = {
-    constants.DEBUG: 'alert-primary',
-    constants.ERROR: 'alert-danger',
-    constants.SUCCESS: 'alert-success',
-    constants.INFO: 'alert-info',
-    constants.WARNING: 'alert-warning',
-}
 
 TEMPLATES = [
     {
@@ -82,7 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -92,7 +79,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -134,6 +120,16 @@ STATIC_ROOT = os.path.join('static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+ROOT_URLCONF = 'core.urls'
+
+# Messages
+MESSAGE_TAGS = {
+    constants.DEBUG: 'alert-primary',
+    constants.ERROR: 'alert-danger',
+    constants.SUCCESS: 'alert-success',
+    constants.INFO: 'alert-info',
+    constants.WARNING: 'alert-warning',
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
