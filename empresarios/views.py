@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from .models import Empresas
+from .models import Empresas, Documento
 from django.contrib import messages
 from django.contrib.messages import constants
+from django.contrib.auth import decorators
 
 # Create your views here.
 
@@ -49,3 +50,51 @@ def cadastrar_empresa(request):
         
         messages.add_message(request, constants.SUCCESS, 'Empresa criada com sucesso')
         return redirect('/empresarios/cadastrar_empresa')
+
+@decorators.login_required
+def listar_empresas(request):
+    if not request.user.is_authenticated:
+        return redirect('/usuarios/logar')
+    if request.method == "GET":
+        # TODO: Realizar os filtros das empresas
+        empresas = Empresas.objects.filter(user=request.user)
+        return render(request, "listar_empresas.html", {"empresas": empresas})
+
+def empresa(request, id):
+    _empresa = Empresas.objects.get(id=id)
+    if _empresa.user != request.user: 
+        messages.add_message(request, constants.ERROR, "Essa empresa não é sua")
+        return redirect(f'/empresarios/listar_empresa')
+    documentos = Documento.objects.filter(empresa=_empresa)
+    print(documentos)
+    if request.method == "GET":
+        return render(request, "empresa.html", {"empresa":_empresa, "documentos": documentos})
+
+
+def add_doc(request, id):
+    _empresa = Empresas.objects.get(id=id)
+    title = request.POST.get("titulo")
+    arquivo = request.FILES.get("arquivo")
+    extensao = arquivo.name.split('.')
+
+    if _empresa.user != request.user: 
+        messages.add_message(request, constants.ERROR, "Essa empresa não é sua")
+        return redirect(f'/empresarios/listar_empresa')
+    
+    if extensao[1] != 'pdf':
+        messages.add_message(request, constants.ERROR, "Envie apenas PDF's")
+        return redirect(f'/empresarios/empresa/{_empresa.id}')
+    
+    if not arquivo and title:
+        messages.add_message(request, constants.ERROR, "Nenhum arquivo cadastrado")
+        return redirect(f'/empresarios/empresa/{_empresa.id}')
+
+    docs = Documento(
+        empresa = _empresa,
+        titulo = title,
+        arquivo = arquivo
+    )
+    docs.save()
+
+    messages.add_message(request, constants.SUCCESS, "Arquivo cadastrado com sucesso")
+    return redirect(f'/empresarios/empresa/{_empresa.id}')
