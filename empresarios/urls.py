@@ -6,4 +6,6 @@ urlpatterns = [
     path('lista_empresas/', views.listar_empresas, name="lista_empresas"),
     path('empresa/<int:id>', views.empresa, name="empresa"),
     path('add_doc/<int:id>', views.add_doc, name="add_doc"),
+    path('ex_doc/<int:id>', views.ex_doc, name="ex_doc"),
+    path('add_metrica/<int:id>', views.add_metrica, name="add_metrica"),
 ] 

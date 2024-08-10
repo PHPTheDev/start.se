@@ -49,7 +49,7 @@ class Empresas(models.Model):
         return mark_safe('<span class="badge bg-primary">Em captação</span>')
     @property
     def value(self):
-        return f'{(100 * self.valor) / self.percentual_equity:.2f}'
+        return float(f'{(100 * self.valor) / self.percentual_equity:.2f}')
 
 class Documento(models.Model):
     empresa = models.ForeignKey(Empresas, on_delete=models.DO_NOTHING)
@@ -57,4 +57,12 @@ class Documento(models.Model):
     arquivo = models.FileField(upload_to='documentos')
 
     def __str__(self) -> str:
+        return self.titulo
+
+class Metricas(models.Model):
+    empresa = models.ForeignKey(Empresas, on_delete=models.DO_NOTHING)
+    titulo = models.CharField(max_length=30)
+    valor = models.FloatField()
+
+    def __str__(self):
         return self.titulo

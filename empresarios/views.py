@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Empresas, Documento
+from .models import Empresas, Documento, Metricas
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.contrib.auth import decorators
@@ -43,8 +43,10 @@ def cadastrar_empresa(request):
                 pitch=pitch,
                 logo=logo
             )
+            print(empresa)
             empresa.save()
         except:
+            print(empresa)
             messages.add_message(request, constants.ERROR, 'Erro interno do sistema')
             return redirect('/empresarios/cadastrar_empresa')
         
@@ -98,3 +100,28 @@ def add_doc(request, id):
 
     messages.add_message(request, constants.SUCCESS, "Arquivo cadastrado com sucesso")
     return redirect(f'/empresarios/empresa/{_empresa.id}')
+
+def ex_doc(request, id):
+    documento = Documento.objects.get(id=id)
+    documento.delete()
+    if documento.empresa.user != request.user: 
+        messages.add_message(request, constants.ERROR, "Não pode deletar esse arquivo")
+        return redirect(f'/empresarios/empresa/{documento.empresa.id}')
+    messages.add_message(request, constants.SUCCESS, "Documento Deletado com sucesso")
+    return redirect(f'/empresarios/empresa/{documento.empresa.id}')
+
+def add_metrica(request, id):
+    empresa = Empresas.objects.get(id=id)
+    titulo = request.POST.get('titulo')
+    valor = request.POST.get('valor')
+
+    metrica = Metricas(
+        empresa=empresa,
+        titulo=titulo,
+        valor=valor
+    )
+    metrica.save()
+
+    messages.add_message(request, constants.SUCCESS, "Métrica cadastrada com sucesso")
+    return redirect(f'/empresarios/empresa/{empresa.id}')
+    
