@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Empresas, Documento, Metricas
+from investidores.models import PropostaInvestimento
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.contrib.auth import decorators
@@ -67,10 +68,28 @@ def empresa(request, id):
     if _empresa.user != request.user: 
         messages.add_message(request, constants.ERROR, "Essa empresa não é sua")
         return redirect(f'/empresarios/listar_empresa')
-    documentos = Documento.objects.filter(empresa=_empresa)
-    print(documentos)
-    if request.method == "GET":
-        return render(request, "empresa.html", {"empresa":_empresa, "documentos": documentos})
+
+    if request.method == "GET":    
+        documentos = Documento.objects.filter(empresa=_empresa)
+        proposta_investimentos = PropostaInvestimento.objects.filter(empresa=_empresa)
+        proposta_investimento_ev = proposta_investimentos.filter(status="PE")
+
+        percentual_vendido = 0
+        total_captado = 0
+        for pi in proposta_investimentos:
+            if pi.status == 'PA':
+                percentual_vendido = percentual_vendido + pi.percentual
+                total_captado = sum(proposta_investimentos.filter(status='PA').values_list('valor', flat=True))
+                value_atual = (100 * float(total_captado)) / float(percentual_vendido) if percentual_vendido != 0 else 0
+        print(total_captado)
+        return render(request, "empresa.html", {
+                        "empresa":_empresa, 
+                        "documentos": documentos, 
+                        "propostas": proposta_investimento_ev, 
+                        "percentual":int(percentual_vendido), 
+                        "total_captado": total_captado,
+                        "value_total": value_atual
+                    })
 
 
 def add_doc(request, id):
@@ -124,4 +143,19 @@ def add_metrica(request, id):
 
     messages.add_message(request, constants.SUCCESS, "Métrica cadastrada com sucesso")
     return redirect(f'/empresarios/empresa/{empresa.id}')
-    
+
+def gerenciar_proposta(request, id):
+    acao = request.GET.get('acao')
+    print(acao)
+    pi = PropostaInvestimento.objects.get(id=id)
+    if acao == 'aceitar':
+        messages.add_message(request, constants.SUCCESS, 'Proposta aceita')
+        pi.status = "PA"
+    elif acao == 'negar':
+        messages.add_message(request, constants.ERROR, 'Proposta recusada')
+        pi.status = "PR"
+    pi.save()
+    return redirect(f'/empresarios/empresa/{pi.empresa.id}')
+
+
+

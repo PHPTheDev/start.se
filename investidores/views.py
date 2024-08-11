@@ -39,8 +39,21 @@ def ver_empresa(request, id):
     empresa = Empresas.objects.get(id=id)
     documentos = Documento.objects.filter(empresa=empresa)
     metricas = Metricas.objects.filter(empresa=empresa)
+    propostas = PropostaInvestimento.objects.filter(empresa=empresa)
+    percentual_vendido = 0
+    for pi in propostas:
+        percentual_vendido += pi.percentual
+    limiar = (float(80 * empresa.percentual_equity) / 100)
+    percentual_disp = empresa.percentual_equity - percentual_vendido
     # TODO: Listar as metricas dinamicamente
-    return render(request, 'ver_empresa.html', {'empresa': empresa, "documentos": documentos, "metricas": metricas})
+    return render(request, 'ver_empresa.html', {
+        'empresa': empresa, 
+        "documentos": documentos, 
+        "metricas": metricas,
+        'percentual_vendido': int(percentual_vendido),
+        'limiar': limiar,
+        'percentual_disp': percentual_disp
+        })
 
 def realizar_proposta(request, id):
     valor = request.POST.get('valor')
